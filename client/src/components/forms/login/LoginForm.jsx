@@ -19,6 +19,9 @@ import Cookies from 'universal-cookie';
 import "./LoginForm.scss"
 import {Link} from "react-router-dom";
 
+import {connect} from "react-redux";
+import {login} from "../../../actions/actions";
+
 const cookies = new Cookies();
 
 class LoginForm extends Component {
@@ -41,8 +44,6 @@ class LoginForm extends Component {
         this.login = this.login.bind(this);
         this.onLoginResponse = this.onLoginResponse.bind(this);
         this.onLoginError = this.onLoginError.bind(this);
-
-        this.apiRequest = new APIRequest("login/", this.onLoginResponse, this.onLoginError);
     }
 
     renderFormError() {
@@ -67,8 +68,8 @@ class LoginForm extends Component {
     }
 
     login() {
+        this.props.login(this.state.usernameEmail, this.state.password);
         this.setState({processing: true});
-        this.apiRequest.call({"username": this.state.usernameEmail, "password": this.state.password});
     }
 
     onLoginResponse(data) {
@@ -152,4 +153,12 @@ class LoginForm extends Component {
     }
 }
 
-export default LoginForm;
+const mapStateToProps = state => {
+    return {};
+};
+
+const mapDispatchToProps = {
+    login: login,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
