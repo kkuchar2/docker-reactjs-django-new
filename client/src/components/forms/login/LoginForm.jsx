@@ -5,7 +5,6 @@ import TextInputField from "components/fields/TextInputField.jsx";
 import PasswordInputField from "components/fields/PasswordInputField.jsx";
 import SubmitButton from "components/buttons/SubmitButton.jsx";
 import ErrorText from "components/errors/ErrorText.jsx";
-import APIRequest from "components/common/APIRequest.jsx";
 
 import FacebookButton from "components/buttons/social/FacebookButton.jsx";
 import GoogleButton from "components/buttons/social/GoogleButton.jsx";
@@ -19,8 +18,9 @@ import Cookies from 'universal-cookie';
 import "./LoginForm.scss"
 import {Link} from "react-router-dom";
 
+
 import {connect} from "react-redux";
-import {login} from "../../../actions/actions";
+import {userActions} from "../../../redux/actions/user.actions";
 
 const cookies = new Cookies();
 
@@ -68,8 +68,8 @@ class LoginForm extends Component {
     }
 
     login() {
-        this.props.login(this.state.usernameEmail, this.state.password);
         this.setState({processing: true});
+        this.props.login(this.state.usernameEmail, this.state.password);
     }
 
     onLoginResponse(data) {
@@ -158,7 +158,7 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = {
-    login: login,
+    login: userActions.login,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

@@ -7,8 +7,8 @@ import indexRoutes from "routes/indexRoutes.jsx";
 
 import NotFound from "layouts/NotFound.jsx";
 import {Provider} from "react-redux";
+import {store} from "./redux/store";
 
-import store from "./store/store";
 
 ReactDOM.render(
     <Provider store={store}>
