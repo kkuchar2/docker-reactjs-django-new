@@ -12,21 +12,18 @@ export const userActions = {
 };
 
 function login(username, password) {
-    return dispatch_method => {
-
-        // 'dispatch_method' is store's dispatching method (just we assigned different name)
-
-        dispatch_method(request({ username }));
+    return (dispatch) => {
+        dispatch(request({ username }));
 
         userService.login(username, password)
             .then(
                 user => {
-                    dispatch_method(success(user));
+                    dispatch(success(user));
                     history.push('/');
                 },
                 error => {
-                    dispatch_method(failure(error.toString()));
-                    dispatch_method(alertActions.error(error.toString()));
+                    dispatch(failure(error));
+                    dispatch(alertActions.error(error.toString()));
                 }
             );
     };
@@ -35,22 +32,26 @@ function login(username, password) {
         console.log("Returning action type: LOGIN REQUEST");
         return { type: userConstants.LOGIN_REQUEST, user }
     }
-    function success(user) { return { type: userConstants.LOGIN_SUCCESS, user } }
-    function failure(error) {
-        // TODO:
+    function success(user) {
+        console.log("Login success");
+        console.log(user); // <--- authentication token
 
         /**
-         * 1. Interpret error as json
-         * 2. Interpret all errors and based on them return specific action
-         * 3. {
-         *     one of fields empty
-         *     both empty
-         *     password wrong
-         *     username / email wrong
-         *     other (cannot connect etc.)
-         * }
+         * Authentication token ideally should have expiration time on server side.
+         *
+         * 1. Get access token - short lived, we can store it in cookie or localStorage
+         * 2. Get bearer token - long lived (for access token refresh request) - store it in secure cookie
+         *
+         * 3. Whenever access token is going to be expired, request new one
+         *    using bearer token stored in cookie
          */
-        return { type: userConstants.LOGIN_FAILURE, error }
+
+        return { type: userConstants.LOGIN_SUCCESS, user }
+    }
+    function failure(data) {
+        console.log("Response: ");
+        console.log(data);
+        return { type: userConstants.LOGIN_FAILURE, data }
     }
 }
 

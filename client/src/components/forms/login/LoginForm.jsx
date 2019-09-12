@@ -34,8 +34,7 @@ class LoginForm extends Component {
             password: '',
             usernameEmailError: '',
             passwordError: '',
-            formError: '',
-            processing: false,
+            formError: ''
         };
 
         this.onUsernameEmailChange = this.onUsernameEmailChange.bind(this);
@@ -68,7 +67,6 @@ class LoginForm extends Component {
     }
 
     login() {
-        this.setState({processing: true});
         this.props.login(this.state.usernameEmail, this.state.password);
     }
 
@@ -123,11 +121,11 @@ class LoginForm extends Component {
                         </Grid>
 
                         <Grid className={"signIn"} style={{padding: 0, width: "100%", textAlign: "center"}} item>
-                            <Loader visible={this.state.processing}/>
+                            <Loader visible={this.props.loggingIn}/>
                             <SubmitButton
                                 className={"signInButton"}
                                 onClick={this.onSubmitForm}
-                                processing={this.state.processing}
+                                processing={this.props.loggingIn}
                                 text={"Log in"}>s
                             </SubmitButton>
                         </Grid>
@@ -154,7 +152,8 @@ class LoginForm extends Component {
 }
 
 const mapStateToProps = state => {
-    return {};
+    const { loggingIn, loginError } = state.authentication;
+    return { loggingIn, loginError };
 };
 
 const mapDispatchToProps = {

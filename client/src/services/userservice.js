@@ -11,6 +11,13 @@ export const userService = {
     delete: _delete
 };
 
+function createErrorInfo(status, data) {
+    let errorInfo = {};
+    errorInfo.response_status = status;
+    errorInfo.message  = data;
+    return errorInfo;
+}
+
 function login(username, password) {
     const requestOptions = {
         method: 'POST',
@@ -25,6 +32,13 @@ function login(username, password) {
         .then(user => {
             localStorage.setItem('user', JSON.stringify(user));
             return user;
+        })
+        .catch((data) => {
+            if (data instanceof TypeError) {
+                return Promise.reject(createErrorInfo(-1, "Network info"));
+            }
+
+            return Promise.reject(data);
         });
 }
 
@@ -83,8 +97,6 @@ function _delete(id) {
 
 function handleResponse(response) {
     return response.text().then(text => {
-        const json = JSON.parse(text);
-        const data = text && json;
 
         if (!response.ok) {
             if (response.status === 401) {
@@ -93,19 +105,20 @@ function handleResponse(response) {
                 location.reload(true);
             }
 
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
+            return Promise.reject(createErrorInfo(response.status, text));
         }
+        else {
+            const json = JSON.parse(text);
+            const data = text && json;
+            const response_status = json["status"];
 
-        const response_status = json["status"];
-
-        console.log("Response: ");
-        console.log(JSON.parse(text));
-
-        if (response_status === "error") {
-            return Promise.reject(error);
+            if (response_status === "error") {
+                let errorInfo = createErrorInfo(response.status, JSON.parse(text));
+                return Promise.reject(errorInfo);
+            }
+            else {
+                return data;
+            }
         }
-
-        return data;
     });
 }
