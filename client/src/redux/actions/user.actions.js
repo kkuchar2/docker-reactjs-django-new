@@ -1,7 +1,8 @@
 import {userService} from "../../services/userservice";
 import {userConstants} from "../../constants/constants";
 import {alertActions} from "./alert.actions";
-import {history} from "../../helpers/history";
+
+import { push } from 'react-router-redux'
 
 export const userActions = {
     login,
@@ -19,7 +20,6 @@ function login(username, password) {
             .then(
                 user => {
                     dispatch(success(user));
-                    history.push('/');
                 },
                 error => {
                     dispatch(failure(error));
@@ -68,7 +68,7 @@ function register(user) {
             .then(
                 user => {
                     dispatch(success());
-                    history.push('/login');
+                    // TODO: redirect to '/' or login page
                     dispatch(alertActions.success('Registration successful'));
                 },
                 error => {

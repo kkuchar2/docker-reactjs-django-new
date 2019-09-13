@@ -1,5 +1,10 @@
 import config from 'config';
+
 import {authHeader} from "../helpers/auth-header";
+
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 export const userService = {
     login,
@@ -14,7 +19,7 @@ export const userService = {
 function createErrorInfo(status, data) {
     let errorInfo = {};
     errorInfo.response_status = status;
-    errorInfo.message  = data;
+    errorInfo.message = data;
     return errorInfo;
 }
 
@@ -22,20 +27,27 @@ function login(username, password) {
     const requestOptions = {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json' ,
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({username, password})
     };
 
     return fetch(`${config.apiUrl}/login/`, requestOptions)
         .then(handleResponse)
-        .then(user => {
-            localStorage.setItem('user', JSON.stringify(user));
-            return user;
+        .then(response => {
+            console.log("Setting token in cookie:");
+            console.log(response["key"]);
+            cookies.set('access_token', response["key"],
+                {
+                    path: '',
+                    secure: true,
+                    httpOnly: true
+                });
+            return response;
         })
         .catch((data) => {
             if (data instanceof TypeError) {
-                return Promise.reject(createErrorInfo(-1, "Network info"));
+                return Promise.reject(createErrorInfo(-1, "Could not connect to: " + `${config.apiUrl}/login/`));
             }
 
             return Promise.reject(data);
@@ -68,7 +80,7 @@ function getById(id) {
 function register(user) {
     const requestOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(user)
     };
 
@@ -78,7 +90,7 @@ function register(user) {
 function update(user) {
     const requestOptions = {
         method: 'PUT',
-        headers: { ...authHeader(), 'Content-Type': 'application/json' },
+        headers: {...authHeader(), 'Content-Type': 'application/json'},
         body: JSON.stringify(user)
     };
 
@@ -106,8 +118,7 @@ function handleResponse(response) {
             }
 
             return Promise.reject(createErrorInfo(response.status, text));
-        }
-        else {
+        } else {
             const json = JSON.parse(text);
             const data = text && json;
             const response_status = json["status"];
@@ -115,8 +126,7 @@ function handleResponse(response) {
             if (response_status === "error") {
                 let errorInfo = createErrorInfo(response.status, JSON.parse(text));
                 return Promise.reject(errorInfo);
-            }
-            else {
+            } else {
                 return data;
             }
         }

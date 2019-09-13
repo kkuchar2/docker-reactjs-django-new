@@ -13,16 +13,12 @@ import GoogleButton from "components/buttons/social/GoogleButton.jsx";
 import Loader from "components/loaders/Loader.jsx";
 import CheckBox from "components/checkbox/CheckBox.jsx";
 
-import Cookies from 'universal-cookie';
 
 import "./LoginForm.scss"
-import {Link} from "react-router-dom";
-
+import {Link, withRouter} from "react-router-dom";
 
 import {connect} from "react-redux";
 import {userActions} from "../../../redux/actions/user.actions";
-
-const cookies = new Cookies();
 
 class LoginForm extends Component {
 
@@ -40,7 +36,6 @@ class LoginForm extends Component {
         this.onUsernameEmailChange = this.onUsernameEmailChange.bind(this);
         this.onPasswordChange = this.onPasswordChange.bind(this);
         this.onSubmitForm = this.onSubmitForm.bind(this);
-        this.login = this.login.bind(this);
         this.onLoginResponse = this.onLoginResponse.bind(this);
         this.onLoginError = this.onLoginError.bind(this);
     }
@@ -63,20 +58,24 @@ class LoginForm extends Component {
 
     onSubmitForm(event) {
         event.preventDefault();
-        this.login();
-    }
-
-    login() {
         this.props.login(this.state.usernameEmail, this.state.password);
     }
 
     onLoginResponse(data) {
         console.log(JSON.stringify(data, null, 4));
-        cookies.set('key', data["key"], {path: '/', secure: true, sameSite: true});
     }
 
     onLoginError(error) {
         console.log(error);
+    }
+
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        let loggedIn = this.props.loggedIn;
+
+        if (loggedIn) {
+            this.props.history.push('/home');
+        }
     }
 
     render() {
@@ -130,18 +129,13 @@ class LoginForm extends Component {
                             </SubmitButton>
                         </Grid>
 
-
                         <div className={"createAccount"}>
                             <Link to='/register' className={"createAccountLink"}>Register</Link>
                         </div>
 
-
                         <div className={"bottomSection"}>
-
                             <GoogleButton/>
                             <FacebookButton/>
-
-
                         </div>
 
                     </Grid>
@@ -152,12 +146,12 @@ class LoginForm extends Component {
 }
 
 const mapStateToProps = state => {
-    const { loggingIn, loginError } = state.authentication;
-    return { loggingIn, loginError };
+    const { loggingIn, loggedIn, loginError } = state.authentication;
+    return { loggingIn, loggedIn, loginError };
 };
 
 const mapDispatchToProps = {
     login: userActions.login,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(LoginForm));
